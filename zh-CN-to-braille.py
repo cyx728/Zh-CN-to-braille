@@ -303,31 +303,48 @@ def HanziDictMatch(text, idx):
         return result, max_len
     return None, 0
 
+def is_digit(ch):
+    return '0' <= ch <= '9'
 
 def Hanzi2Braille(text):
-    """
-    汉字 -> 盲文
-    优先使用 dictionary 中的汉字/词条
-    未命中的部分再走 拼音 -> 盲文
-    """
     result = ""
     i = 0
     buffer = ""
+    in_number = False   # 数字状态机
+
     while i < len(text):
-        # 1. 尝试 dictionary 汉字 / 词条优先匹配
-        braille, length = HanziDictMatch(text, i)
-        if length > 0:
-            # 先把 buffer 中累积的汉字送去拼音处理
+        ch = text[i]
+
+        # —— 数字处理（最高优先级之一）——
+        if is_digit(ch):
             if buffer:
                 pinyin_list = Hanzi2Pinyin(buffer)
                 result += Pinyin2Braille(pinyin_list)
                 buffer = ""
-            # 输出 dictionary 命中的盲文
+
+            if not in_number:
+                result += '⠼'   # 3456 数字前缀
+                in_number = True
+
+            result += dictionary[ch]
+            i += 1
+            continue
+        else:
+            in_number = False
+
+        # —— dictionary 汉字 / 词条优先匹配 ——
+        braille, length = HanziDictMatch(text, i)
+        if length > 0:
+            if buffer:
+                pinyin_list = Hanzi2Pinyin(buffer)
+                result += Pinyin2Braille(pinyin_list)
+                buffer = ""
+
             result += braille
             i += length
             continue
-        ch = text[i]
-        # 2. 非汉字、标点、字母、数字 —— 直接 dictionary
+
+        # —— 其他 dictionary 字符（标点等）——
         if ch in dictionary:
             if buffer:
                 pinyin_list = Hanzi2Pinyin(buffer)
@@ -336,14 +353,17 @@ def Hanzi2Braille(text):
             result += dictionary[ch]
             i += 1
             continue
-        # 3. 普通汉字，放入 buffer，稍后统一转拼音
+
+        # —— 普通汉字，进 buffer ——
         buffer += ch
         i += 1
-    # 4. 收尾处理
+
     if buffer:
         pinyin_list = Hanzi2Pinyin(buffer)
         result += Pinyin2Braille(pinyin_list)
+
     return result
+
 
 
 def Pinyin2Braille(list1): #将拼音列表转换为盲文
@@ -357,10 +377,10 @@ def Pinyin2Braille(list1): #将拼音列表转换为盲文
         res = dictionary.get(list1[i])
         if (res != None):
             if ('A' <= list1[i] <= 'Z' and capitalflag == True):
-                res = ' ⠠' + res
+                res = ' ⠠[CAP_FLAG]' + res
                 capitalflag = False
             elif ('0' <= list1[i] <= '9' and digitalflag == True):
-                res = ' ⠼' + res
+                res = ' ⠼[NUM_FLAG]' + res
                 digitalflag = False
             if (capitalflag == False and ('A' > list1[i] or list1[i] > 'Z') and list1[i] != ' '):
                 capitalflag = True
