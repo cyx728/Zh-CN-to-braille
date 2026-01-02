@@ -377,10 +377,10 @@ def Pinyin2Braille(list1): #将拼音列表转换为盲文
         res = dictionary.get(list1[i])
         if (res != None):
             if ('A' <= list1[i] <= 'Z' and capitalflag == True):
-                res = ' ⠠[CAP_FLAG]' + res
+                res = ' ⠠' + res
                 capitalflag = False
             elif ('0' <= list1[i] <= '9' and digitalflag == True):
-                res = ' ⠼[NUM_FLAG]' + res
+                res = ' ⠼' + res
                 digitalflag = False
             if (capitalflag == False and ('A' > list1[i] or list1[i] > 'Z') and list1[i] != ' '):
                 capitalflag = True
