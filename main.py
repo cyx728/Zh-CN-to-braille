@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-from braille.__init__ import *
+from __init__ import *
 from tkinter import *
 from tkinter.filedialog import askdirectory
 

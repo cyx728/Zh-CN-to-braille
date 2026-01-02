@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-from braille.__init__ import *
+from __init__ import *
 import copy
 from tkinter import *
 from tkinter.filedialog import askdirectory
@@ -83,6 +83,7 @@ def rightKey(event, editor):
 def showCut():
     str=text1.get("0.0",END)
     newStr=cutWords(str)
+    print(newStr)
     text2.delete("0.0", END)
     text2.insert("0.0",newStr)
 
